@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ratliff's Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Playfair+Display+SC&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --parchment: #f5f0e8;
+    --parchment-mid: #ede6d8;
+    --parchment-dark: #e8e0d0;
+    --ink-dark: #3a2a1a;
+    --ink-mid: #4a3a2a;
+    --ink-light: #6b5b4b;
+    --brown-dark: #654321;
+    --brown-mid: #8b7355;
+    --brown-light: #a09080;
+    --brown-pale: #b5a590;
+    --brown-ghost: #c4b8a8;
+    --brown-whisper: #d4c8b8;
+    --card-bg: rgba(255,253,248,0.7);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(139,115,85,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(101,67,33,0.06) 0%, transparent 50%),
+      linear-gradient(180deg, var(--parchment) 0%, var(--parchment-mid) 40%, var(--parchment-dark) 100%);
+    font-family: 'Crimson Text', Georgia, serif;
+    color: var(--ink-mid);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 100;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  }
+
+  .ledger {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 24px 20px;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 0.8s ease-out 0.2s forwards;
+  }
+
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-12px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* ─── Header ─── */
+  .header-rule {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--brown-mid), var(--brown-dark), var(--brown-mid), transparent);
+  }
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 16px 8px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .company-name {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--ink-dark);
+    letter-spacing: 1px;
+    line-height: 1;
+  }
+
+  .company-subtitle {
+    font-size: 17px;
+    font-style: italic;
+    color: var(--brown-mid);
+    margin-top: 2px;
+  }
+
+  .header-center {
+    text-align: center;
+    flex: 1 1 auto;
+    padding-top: 4px;
+  }
+
+  .ledger-title {
+    font-family: 'Playfair Display SC', Georgia, serif;
+    font-size: 15px;
+    letter-spacing: 6px;
+    color: var(--brown-dark);
+    font-weight: 400;
+  }
+
+  .ledger-subtitle {
+    font-size: 11px;
+    color: var(--brown-light);
+    font-style: italic;
+    margin-top: 4px;
+    letter-spacing: 0.5px;
+  }
+
+  .header-right {
+    text-align: right;
+  }
+
+  .date-block {
+    font-size: 13px;
+    color: var(--brown-dark);
+    font-weight: 600;
+  }
+
+  .time-block {
+    font-size: 11px;
+    color: var(--brown-light);
+    font-style: italic;
+    margin-top: 2px;
+  }
+
+  /* ─── Summary ─── */
+  .summary-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 0;
+    margin: 4px 0 24px 0;
+    border-top: 1px solid var(--brown-whisper);
+    border-bottom: 1px solid var(--brown-whisper);
+  }
+
+  .summary-number {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--ink-dark);
+    margin-right: 4px;
+  }
+
+  .summary-label {
+    font-size: 14px;
+    color: var(--ink-light);
+  }
+
+  .summary-dot {
+    color: var(--brown-ghost);
+    font-size: 18px;
+  }
+
+  /* ─── Sections ─── */
+  .sections { display: flex; flex-direction: column; gap: 4px; }
+
+  .section {
+    background: var(--card-bg);
+    border-left: 3px solid var(--brown-mid);
+    opacity: 0;
+    animation: slideIn 0.4s ease-out forwards;
+    transition: background 0.2s ease;
+  }
+
+  .section:hover {
+    background: rgba(255,253,248,0.9);
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 13px 16px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .section-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-icon {
+    font-size: 14px;
+    font-weight: 700;
+    width: 28px;
+    text-align: center;
+    opacity: 0.75;
+  }
+
+  .section-label {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--ink-dark);
+    letter-spacing: 0.3px;
+  }
+
+  .section-header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-count {
+    font-size: 13px;
+    color: var(--brown-light);
+    font-style: italic;
+  }
+
+  .chevron {
+    font-size: 22px;
+    color: var(--brown-light);
+    transition: transform 0.25s ease;
+    font-weight: 300;
+    line-height: 1;
+  }
+
+  .chevron.open { transform: rotate(90deg); }
+
+  /* ─── Items ─── */
+  .items-list {
+    padding: 0 16px 14px 54px;
+  }
+
+  .item-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 5px 0;
+    line-height: 1.55;
+  }
+
+  .item-bullet {
+    color: var(--brown-pale);
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    font-weight: 300;
+  }
+
+  .item-text {
+    font-size: 15px;
+    color: var(--ink-mid);
+    flex: 1;
+  }
+
+  .item-text.done {
+    color: var(--brown-pale);
+    text-decoration: line-through;
+    text-decoration-color: var(--brown-ghost);
+    font-style: italic;
+    font-size: 14px;
+  }
+
+  .item-source {
+    font-size: 11px;
+    flex-shrink: 0;
+    opacity: 0.45;
+    margin-top: 3px;
+  }
+
+  /* ─── Done divider ─── */
+  .done-divider {
+    text-align: center;
+    margin: 6px 0 10px 0;
+  }
+
+  .done-label {
+    font-size: 11px;
+    color: var(--brown-ghost);
+    font-style: italic;
+    letter-spacing: 2px;
+  }
+
+  .empty-note {
+    font-size: 13px;
+    color: var(--brown-ghost);
+    font-style: italic;
+    padding: 0 16px 14px 54px;
+  }
+
+  /* ─── Footer ─── */
+  .footer {
+    margin-top: 36px;
+    text-align: center;
+  }
+
+  .footer-quote {
+    font-size: 12.5px;
+    color: var(--brown-pale);
+    font-style: italic;
+    line-height: 1.7;
+    padding: 16px 24px 0;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  .footer-meta {
+    font-size: 10px;
+    color: var(--brown-whisper);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-top: 14px;
+    display: block;
+    padding-bottom: 12px;
+  }
+
+  .footer-meta .live-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: #6b9e6b;
+    border-radius: 50%;
+    margin-right: 5px;
+    vertical-align: middle;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* ─── Loading ─── */
+  .loading {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .loading-text {
+    font-size: 18px;
+    color: var(--brown-mid);
+    font-style: italic;
+    letter-spacing: 1px;
+    animation: fadeUp 0.6s ease-out;
+  }
+
+  .loading-spinner {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--brown-whisper);
+    border-top-color: var(--brown-mid);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* ─── Mobile ─── */
+  @media (max-width: 600px) {
+    .header-content { flex-direction: column; align-items: center; text-align: center; }
+    .header-right { text-align: center; }
+    .company-name { font-size: 28px; }
+    .section-label { font-size: 15px; }
+    .items-list { padding-left: 42px; }
+    .summary-bar { gap: 10px; flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app" class="loading">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Opening the ledger . . .</div>
+</div>
+
+<script>
+const GIST_ID = '7a00963ff4dd5adfd6bb648835c103e4';
+const GIST_API = `https://api.github.com/gists/${GIST_ID}`;
+
+const ICONS = {
+  life_admin: '§', family: '❧', body_health: '✦',
+  phi_psi: 'ΦΚΨ', flag_football: '⚑', tools_builds: '⚙',
+  travel: '✈', body_art: '◉'
+};
+
+const COLORS = {
+  life_admin: '#c4956a', family: '#6b9e9b', body_health: '#9b6bb5',
+  phi_psi: '#5a7db5', flag_football: '#4a9e8f', tools_builds: '#b55a5a',
+  travel: '#b5a24a', body_art: '#7a6bb5'
+};
+
+const SOURCES = { voice: '🎙', chat: '💬', dispatch: '📱' };
+
+let expandedSections = new Set();
+
+function formatDate(d) {
+  if (!d) return '';
+  try {
+    return new Date(d).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  } catch { return d; }
+}
+
+function formatTime(d) {
+  if (!d) return '';
+  try {
+    return new Date(d).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  } catch { return ''; }
+}
+
+function toggleSection(key) {
+  if (expandedSections.has(key)) {
+    expandedSections.delete(key);
+  } else {
+    expandedSections.add(key);
+  }
+  render(window._lastData);
+}
+
+function render(data) {
+  if (!data || !data.sections) return;
+  window._lastData = data;
+
+  const totalOpen = data.sections.reduce((s, sec) => s + sec.items.filter(i => !i.done).length, 0);
+  const totalDone = data.sections.reduce((s, sec) => s + sec.items.filter(i => i.done).length, 0);
+
+  let sectionsHtml = '';
+  data.sections.forEach((sec, idx) => {
+    const open = sec.items.filter(i => !i.done);
+    const done = sec.items.filter(i => i.done);
+    const expanded = expandedSections.has(sec.key);
+    const color = COLORS[sec.key] || '#8b7355';
+    const icon = ICONS[sec.key] || '•';
+    const countText = open.length === 0 ? 'settled' : `${open.length} item${open.length !== 1 ? 's' : ''}`;
+
+    let itemsHtml = '';
+    if (open.length > 0) {
+      itemsHtml = `<div class="items-list">` +
+        open.map(i => `
+          <div class="item-row">
+            <span class="item-bullet">—</span>
+            <span class="item-text">${esc(i.text)}</span>
+            <span class="item-source">${SOURCES[i.source] || ''}</span>
+          </div>`).join('') +
+        `</div>`;
+    }
+
+    let doneHtml = '';
+    if (expanded && done.length > 0) {
+      doneHtml = `<div class="items-list">
+        <div class="done-divider"><span class="done-label">— settled —</span></div>` +
+        done.map(i => `
+          <div class="item-row">
+            <span class="item-bullet">✓</span>
+            <span class="item-text done">${esc(i.text)}</span>
+          </div>`).join('') +
+        `</div>`;
+    }
+
+    if (expanded && done.length === 0 && open.length === 0) {
+      doneHtml = `<div class="empty-note">No items on this account.</div>`;
+    }
+
+    sectionsHtml += `
+      <div class="section" style="border-left-color: ${color}; animation-delay: ${idx * 0.08}s" id="sec-${sec.key}">
+        <div class="section-header" onclick="toggleSection('${sec.key}')">
+          <div class="section-header-left">
+            <span class="section-icon" style="color: ${color}">${icon}</span>
+            <span class="section-label">${esc(sec.label)}</span>
+          </div>
+          <div class="section-header-right">
+            <span class="section-count">${countText}</span>
+            <span class="chevron ${expanded ? 'open' : ''}">›</span>
+          </div>
+        </div>
+        ${itemsHtml}
+        ${doneHtml}
+      </div>`;
+  });
+
+  document.getElementById('app').innerHTML = `
+    <div class="ledger">
+      <div class="header-rule"></div>
+      <div class="header-content">
+        <div>
+          <div class="company-name">V. K. Ratliff</div>
+          <div class="company-subtitle">& Co.</div>
+        </div>
+        <div class="header-center">
+          <div class="ledger-title">THE LEDGER</div>
+          <div class="ledger-subtitle">Itinerant Services · Frenchman's Bend to Fanwood</div>
+        </div>
+        <div class="header-right">
+          <div class="date-block">${formatDate(data.last_updated)}</div>
+          <div class="time-block">Last entry: ${formatTime(data.last_updated)}</div>
+        </div>
+      </div>
+      <div class="header-rule"></div>
+
+      <div class="summary-bar">
+        <span><span class="summary-number">${totalOpen}</span><span class="summary-label"> outstanding</span></span>
+        <span class="summary-dot">·</span>
+        <span><span class="summary-number">${totalDone}</span><span class="summary-label"> settled</span></span>
+        <span class="summary-dot">·</span>
+        <span><span class="summary-number">${data.sections.length}</span><span class="summary-label"> accounts</span></span>
+      </div>
+
+      <div class="sections">${sectionsHtml}</div>
+
+      <div class="footer">
+        <div class="header-rule"></div>
+        <div class="footer-quote">
+          "He's a sewing-machine agent. . . . He's been a sewing-machine agent
+          ever since he got big enough to find his way around the county."
+        </div>
+        <span class="footer-meta"><span class="live-dot"></span>Live · refreshes every 30s</span>
+      </div>
+    </div>`;
+}
+
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+async function fetchLedger() {
+  try {
+    const resp = await fetch(GIST_API, {
+      headers: { 'Accept': 'application/vnd.github+json' }
+    });
+    if (!resp.ok) throw new Error('Could not reach the ledger');
+    const gist = await resp.json();
+    const content = JSON.parse(gist.files['tbonz-brain-dump.json'].content);
+    render(content);
+  } catch (e) {
+    document.getElementById('app').innerHTML = `
+      <div class="loading">
+        <div class="loading-text" style="color: #8b4513">${esc(e.message)}</div>
+      </div>`;
+  }
+}
+
+fetchLedger();
+setInterval(fetchLedger, 30000);
+</script>
+</body>
+</html>
