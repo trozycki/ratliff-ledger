@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ben's OLine">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22Ben's%20OLine%20Build%22%2C%22short_name%22%3A%22OLine%22%2C%22start_url%22%3A%22.%2Fben-oline-workout.html%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230a0a0a%22%2C%22theme_color%22%3A%22%230a0a0a%22%2C%22orientation%22%3A%22portrait%22%7D">
+<title>Ben's OLine Build</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #e8b84b;
+    --gold-dim: #a07e2a;
+    --black: #0a0a0a;
+    --steel: #141820;
+    --iron: #1e2330;
+    --card: #161b26;
+    --white: #f0ede8;
+    --muted: #6b7280;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Barlow', sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    overflow-x: hidden;
+    padding-top: env(safe-area-inset-top);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+  #app { min-height: 100vh; display: flex; flex-direction: column; }
+  .screen { min-height: 100vh; display: flex; flex-direction: column; }
+
+  /* ── HOME SCREEN ── */
+  .home-hero {
+    background: linear-gradient(160deg, #0f1420 0%, #1a1f2e 60%, #0a0c12 100%);
+    border-bottom: 3px solid var(--gold);
+    padding: 52px 24px 32px;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .home-hero::before {
+    content: 'OL';
+    position: absolute; right: -16px; top: -16px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 180px; font-weight: 900;
+    color: rgba(232,184,75,0.05); line-height: 1; pointer-events: none;
+  }
+  .eyebrow {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px; font-weight: 700; letter-spacing: 4px;
+    text-transform: uppercase; color: var(--gold); margin-bottom: 8px;
+  }
+  .home-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 52px; font-weight: 900; line-height: 0.95;
+    text-transform: uppercase; color: var(--white); margin-bottom: 18px;
+  }
+  .home-title span { color: var(--gold); }
+  .badge-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .badge {
+    background: var(--iron); border: 1px solid rgba(232,184,75,0.3);
+    border-radius: 4px; padding: 5px 10px;
+    font-size: 11px; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--gold);
+  }
+  .home-intro {
+    background: var(--iron); border-left: 4px solid var(--gold);
+    margin: 20px 16px; padding: 16px 18px;
+    border-radius: 0 8px 8px 0;
+    font-size: 14px; line-height: 1.6; color: rgba(240,237,232,0.8);
+  }
+  .home-intro strong { color: var(--gold); }
+  .day-select-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px; font-weight: 700; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--muted);
+    padding: 0 16px; margin-bottom: 10px;
+  }
+  .day-cards { padding: 0 16px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+  .day-card {
+    background: var(--card); border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 14px; padding: 18px 20px;
+    display: flex; align-items: center; gap: 16px;
+    cursor: pointer; transition: border-color 0.2s, background 0.2s;
+  }
+  .day-card:active { transform: scale(0.98); background: var(--iron); }
+  .day-card-icon {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px; font-weight: 900; color: var(--gold);
+    width: 36px; text-align: center; flex-shrink: 0;
+  }
+  .day-card-info { flex: 1; }
+  .day-card-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px; font-weight: 900; text-transform: uppercase;
+    color: var(--white); line-height: 1;
+  }
+  .day-card-sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .day-card-arrow { color: var(--muted); font-size: 20px; }
+  .history-btn {
+    margin: 20px 16px calc(28px + env(safe-area-inset-bottom));
+    padding: 14px; background: transparent;
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+    color: var(--muted); font-family: 'Barlow', sans-serif;
+    font-size: 13px; font-weight: 600; cursor: pointer; text-align: center;
+  }
+  .history-btn:active { background: var(--iron); }
+
+  /* ── WARMUP SCREEN ── */
+  .warmup-header { padding: 44px 24px 18px; flex-shrink: 0; }
+  .back-btn {
+    background: none; border: none; color: var(--gold);
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    font-family: 'Barlow', sans-serif; padding: 0; margin-bottom: 18px; display: block;
+  }
+  .warmup-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 40px; font-weight: 900; text-transform: uppercase;
+    color: var(--white); line-height: 1; margin-bottom: 6px;
+  }
+  .warmup-sub { font-size: 13px; color: var(--muted); }
+  .warmup-list { padding: 16px 16px 0; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .warmup-item {
+    background: var(--card); border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px; padding: 14px 16px;
+    display: flex; align-items: center; gap: 14px; cursor: pointer;
+  }
+  .warmup-item:active { transform: scale(0.99); }
+  .warmup-check {
+    width: 26px; height: 26px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.15);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-size: 13px; color: transparent; transition: all 0.15s;
+  }
+  .warmup-check.done { background: var(--gold); border-color: var(--gold); color: #000; }
+  .warmup-text { font-size: 14px; color: rgba(240,237,232,0.85); line-height: 1.4; }
+  .warmup-item.done .warmup-text { color: var(--muted); text-decoration: line-through; }
+  .primary-cta {
+    margin: 16px 16px calc(24px + env(safe-area-inset-bottom));
+    padding: 18px; border: none; border-radius: 14px;
+    background: var(--gold); color: #000;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px; font-weight: 900; letter-spacing: 1px;
+    cursor: pointer; flex-shrink: 0;
+  }
+  .primary-cta:active { transform: scale(0.98); }
+
+  /* ── WORKOUT SCREEN ── */
+  .workout-header {
+    padding: 14px 20px 10px;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-shrink: 0;
+  }
+  .workout-counter { font-size: 13px; font-weight: 600; color: var(--muted); }
+  .workout-counter span { color: var(--white); }
+  .workout-day-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--gold);
+  }
+  .card-wrap { flex: 1; padding: 0 14px 12px; display: flex; flex-direction: column; overflow-y: auto; }
+  .ex-card {
+    background: var(--card); border-radius: 18px; padding: 20px;
+    flex: 1; display: flex; flex-direction: column;
+    border: 1px solid rgba(232,184,75,0.12);
+    position: relative; overflow: hidden;
+  }
+  .ex-card::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+    width: 4px; background: var(--gold);
+  }
+  .ex-section-tag {
+    font-size: 10px; font-weight: 700; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--gold-dim); margin-bottom: 8px;
+  }
+  .ex-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 30px; font-weight: 900; line-height: 1.05;
+    color: var(--white); margin-bottom: 6px;
+  }
+  .ex-equip {
+    font-size: 11px; font-weight: 600; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 10px;
+  }
+  .ex-tip {
+    font-size: 13px; color: rgba(240,237,232,0.5);
+    line-height: 1.55; margin-bottom: 16px; font-style: italic;
+  }
+  .ex-callout {
+    font-size: 12px; color: #5eead4; font-weight: 600;
+    background: rgba(94,234,212,0.08); border: 1px solid rgba(94,234,212,0.2);
+    border-radius: 6px; padding: 7px 10px; margin-bottom: 14px;
+  }
+  .stats-row { display: flex; gap: 8px; margin-bottom: 16px; }
+  .stat-box {
+    background: var(--iron); border-radius: 12px;
+    padding: 12px 8px; text-align: center; flex: 1;
+  }
+  .stat-val {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 24px; font-weight: 900; color: var(--white);
+  }
+  .stat-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--muted); margin-top: 2px;
+  }
+  .weight-section { margin-bottom: 16px; }
+  .weight-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .weight-label { font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); }
+  .last-weight { font-size: 11px; color: rgba(255,255,255,0.25); }
+  .weight-input-row { display: flex; align-items: center; gap: 10px; }
+  .weight-input {
+    flex: 1; background: var(--iron); border-radius: 12px;
+    padding: 14px 16px; color: var(--white);
+    font-size: 24px; font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+    outline: none; border: 1.5px solid rgba(255,255,255,0.08); width: 100%;
+    transition: border-color 0.2s;
+  }
+  .weight-input:focus { border-color: rgba(232,184,75,0.5); }
+  .weight-unit { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 15px; color: var(--muted); }
+  .sets-label { font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+  .sets-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .set-circle {
+    width: 52px; height: 52px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.12); background: transparent;
+    color: rgba(255,255,255,0.25);
+    font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 20px;
+    cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .set-circle.done { background: var(--gold); border-color: var(--gold); color: #000; transform: scale(1.08); }
+  .nav-row {
+    padding: 0 14px calc(28px + env(safe-area-inset-bottom));
+    display: flex; gap: 10px; flex-shrink: 0;
+  }
+  .nav-btn {
+    flex: 1; padding: 18px; border: none; border-radius: 14px;
+    font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+    font-size: 19px; letter-spacing: 0.05em; cursor: pointer; transition: all 0.15s;
+  }
+  .nav-btn:active { transform: scale(0.97); }
+  .nav-btn-prev { background: var(--iron); color: var(--white); }
+  .nav-btn-prev:disabled { color: rgba(255,255,255,0.18); cursor: default; }
+  .nav-btn-prev:disabled:active { transform: none; }
+  .nav-btn-next { background: var(--gold); color: #000; }
+
+  /* ── DONE SCREEN ── */
+  .done-screen {
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 32px 24px calc(32px + env(safe-area-inset-bottom)); text-align: center;
+  }
+  .done-icon { font-size: 64px; margin-bottom: 12px; }
+  .done-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 48px; font-weight: 900; color: var(--gold);
+    line-height: 1; margin-bottom: 6px;
+  }
+  .done-sub { font-size: 14px; color: var(--muted); margin-bottom: 28px; }
+  .session-summary {
+    background: var(--card); border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 16px; padding: 18px; width: 100%; margin-bottom: 20px; text-align: left;
+  }
+  .summary-title {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 12px;
+  }
+  .summary-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .summary-row:last-child { border-bottom: none; }
+  .summary-ex { font-size: 13px; color: rgba(240,237,232,0.75); flex: 1; }
+  .summary-vals { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+  .summary-weight { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 15px; color: var(--gold); }
+  .summary-reps { font-size: 12px; color: var(--muted); }
+  .done-btn {
+    width: 100%; padding: 18px; border: none; border-radius: 14px;
+    font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+    font-size: 19px; letter-spacing: 0.05em; cursor: pointer; margin-bottom: 10px;
+  }
+  .done-btn:active { transform: scale(0.98); }
+  .done-btn-primary { background: var(--gold); color: #000; }
+  .done-btn-ghost { background: transparent; color: var(--muted); border: 1px solid rgba(255,255,255,0.1); }
+
+  /* ── HISTORY SCREEN ── */
+  .history-header {
+    padding: 44px 24px 18px;
+    display: flex; justify-content: space-between; align-items: flex-start;
+    flex-shrink: 0;
+  }
+  .history-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 40px; font-weight: 900; color: var(--white);
+  }
+  .history-count { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .clear-btn {
+    background: none; border: 1px solid rgba(255,255,255,0.1);
+    color: var(--muted); border-radius: 8px; padding: 6px 12px;
+    font-size: 11px; cursor: pointer; margin-top: 54px; font-family: 'Barlow', sans-serif;
+  }
+  .history-list { flex: 1; padding: 0 16px calc(32px + env(safe-area-inset-bottom)); overflow-y: auto; }
+  .history-empty { font-size: 14px; color: var(--muted); margin-top: 20px; }
+  .history-item {
+    margin-bottom: 14px; background: var(--card);
+    border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 16px;
+  }
+  .history-item-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+  .history-item-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px; font-weight: 900; color: var(--white);
+  }
+  .history-item-date { font-size: 12px; color: var(--muted); }
+  .history-ex-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .history-ex-row:last-child { border-bottom: none; }
+  .history-ex-name { font-size: 13px; color: rgba(240,237,232,0.7); flex: 1; }
+  .history-ex-weight { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 14px; color: var(--gold); }
+  .history-ex-reps { font-size: 12px; color: var(--muted); margin-left: 8px; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+
+// ─── DATA ────────────────────────────────────────────────────────────────────
+
+const DAYS = [
+  {
+    id: 'day1', label: 'Day 1', dow: 'Monday', focus: 'Lower Power',
+    icon: '▲',
+    warmUp: [
+      'Hip circles — 10 each direction',
+      'Leg swings front and back — 10 each leg',
+      'Goblet squat (light KB) — 2×8, slow descent',
+    ],
+    sections: [
+      {
+        title: 'Primary Lifts',
+        exercises: [
+          { name: 'Trap Bar Deadlift', sets: 4, reps: '5', equip: 'Trap Bar',
+            tip: 'High handles to start. Drive through the floor. Hip extension is the play. Rest 2-3 min.', callout: '★ Anchor lift — protect this one above all else' },
+          { name: 'Barbell Back Squat', sets: 3, reps: '6', equip: 'Barbell',
+            tip: 'Wide stance, chest up. Lineman stance — not a powerlifter squat. Rest 2 min.' },
+        ]
+      },
+      {
+        title: 'Accessory',
+        exercises: [
+          { name: 'Landmine Romanian Deadlift', sets: 3, reps: '10 each', equip: 'Landmine',
+            tip: 'Single-leg. Hamstring strength and lateral stability in one.' },
+          { name: 'Kettlebell Goblet Squat', sets: 3, reps: '12', equip: 'Kettlebell',
+            tip: '2-second pause at the bottom. Build mobility and quad endurance.' },
+          { name: 'Dumbbell Step-Up', sets: 3, reps: '10 each', equip: 'Dumbbells',
+            tip: 'Drive through the heel at the top. Unilateral leg power.' },
+          { name: 'Plank Hold', sets: 3, reps: '45 sec', equip: 'Bodyweight',
+            tip: 'Core bracing = force transfer. Do not skip.' },
+        ]
+      }
+    ]
+  },
+  {
+    id: 'day2', label: 'Day 2', dow: 'Wednesday', focus: 'Upper Strength',
+    icon: '◆',
+    warmUp: [
+      'Arm circles forward and back — 20 each',
+      'Cross-body shoulder swings — 20',
+      'Band pull-aparts or shoulder rotations — 15',
+      '2 warm-up sets of bench at 40-50%',
+    ],
+    sections: [
+      {
+        title: 'Primary Lifts',
+        exercises: [
+          { name: 'Barbell Bench Press', sets: 4, reps: '6', equip: 'Barbell',
+            tip: 'Scapulae retracted, feet into the floor. This is pass protection strength. Rest 2 min.' },
+          { name: 'Landmine Press', sets: 3, reps: '10 each', equip: 'Landmine',
+            tip: 'Half-kneeling, single arm. Shoulder stability + anti-rotation core.', callout: '★ Replicates the exact push angle of a block' },
+        ]
+      },
+      {
+        title: 'Pulling + Back',
+        exercises: [
+          { name: 'Barbell Bent-Over Row', sets: 4, reps: '8', equip: 'Barbell',
+            tip: 'Overhand grip, hinge at the hip. A strong back makes pushing possible.' },
+          { name: 'Dumbbell Incline Row', sets: 3, reps: '12 each', equip: 'Dumbbells',
+            tip: 'Chest on a 30° bench. Full stretch at the bottom. Mid-back isolation.' },
+        ]
+      },
+      {
+        title: 'Arms + Finisher',
+        exercises: [
+          { name: 'EZ Bar Curl', sets: 3, reps: '10', equip: 'EZ Curl Bar',
+            tip: '2 sec up, 2 down. Bicep strength matters for maintaining contact in blocks.' },
+          { name: 'Tricep Landmine Pushdown', sets: 3, reps: '12', equip: 'Landmine',
+            tip: 'Press bar toward floor from a hinge. Triceps through a functional push pattern.' },
+          { name: "Farmer's Carry", sets: 3, reps: '40 yards', equip: 'Dumbbells or KBs',
+            tip: 'Heavy. Walk tall. Grip, core, and mental toughness in one movement.' },
+        ]
+      }
+    ]
+  },
+  {
+    id: 'day3', label: 'Day 3', dow: 'Friday', focus: 'Full Body + Power',
+    icon: '∞',
+    warmUp: [
+      'KB swing warm-up (light) — 2×10',
+      'Hip hinge pattern — feel the posterior chain engage',
+      'Jump rope or jumping jacks — 60 sec',
+    ],
+    sections: [
+      {
+        title: 'Power',
+        exercises: [
+          { name: 'Kettlebell Swing', sets: 4, reps: '15', equip: 'Kettlebell',
+            tip: 'Snap at the top. This is a hip hinge, not a squat. Same fire as every snap.', callout: '★ Most football-specific movement in the program' },
+          { name: 'Landmine Squat to Press', sets: 3, reps: '8', equip: 'Landmine',
+            tip: 'Squat deep, stand and press in one fluid motion. Full power chain.' },
+        ]
+      },
+      {
+        title: 'Strength',
+        exercises: [
+          { name: 'Barbell Overhead Press', sets: 3, reps: '8', equip: 'Barbell',
+            tip: 'Standing, strict. Brace the core hard through every rep.' },
+          { name: 'Trap Bar Deadlift (Volume)', sets: 3, reps: '8', equip: 'Trap Bar',
+            tip: 'Lighter than Monday. Fast concentric. Volume and pattern reinforcement.' },
+        ]
+      },
+      {
+        title: 'Conditioning + Core',
+        exercises: [
+          { name: 'Dumbbell Lateral Lunge', sets: 3, reps: '10 each', equip: 'Dumbbells',
+            tip: 'Mimics lateral blocking steps. Sit into the hip. Wide base.' },
+          { name: 'Kettlebell Goblet Lateral Squat', sets: 2, reps: '8 each', equip: 'Kettlebell',
+            tip: 'Side-to-side. Hip abductor strength for constant lateral movement.' },
+          { name: 'Dead Bug', sets: 3, reps: '10 each', equip: 'Bodyweight',
+            tip: 'Low back flat. Slow and controlled. Anti-extension core protection.' },
+          { name: "Farmer's Carry (Finisher)", sets: 2, reps: '50 yards', equip: 'Dumbbells or KBs',
+            tip: 'Go heavy. End the week strong. Mental toughness disguised as grip work.' },
+        ]
+      }
+    ]
+  }
+];
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+
+const HISTORY_KEY = 'oline_history_v1';
+
+function loadHistory() {
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; }
+  catch { return []; }
+}
+function saveHistory(h) {
+  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(h)); } catch {}
+}
+
+const state = {
+  screen: 'home',       // home | warmup | workout | done | history
+  dayId: null,
+  sectionIdx: 0,
+  exIdx: 0,
+  warmupChecked: [],
+  setsMap: {},          // { "sIdx-eIdx": [bool, bool, ...] }
+  weights: {},          // { "sIdx-eIdx": string }
+  history: loadHistory(),
+};
+
+function getDay() { return DAYS.find(d => d.id === state.dayId); }
+
+function getExercises() {
+  const day = getDay();
+  if (!day) return [];
+  return day.sections.flatMap((s, si) =>
+    s.exercises.map((e, ei) => ({ ...e, sectionTitle: s.title, key: `${si}-${ei}` }))
+  );
+}
+
+function todayStr() {
+  return new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+
+function render() {
+  const app = document.getElementById('app');
+  switch (state.screen) {
+    case 'home':    app.innerHTML = renderHome(); break;
+    case 'warmup':  app.innerHTML = renderWarmup(); break;
+    case 'workout': app.innerHTML = renderWorkout(); break;
+    case 'done':    app.innerHTML = renderDone(); break;
+    case 'history': app.innerHTML = renderHistory(); break;
+  }
+  bindEvents();
+}
+
+// ── HOME ──
+
+function renderHome() {
+  const dayCards = DAYS.map(d => `
+    <button class="day-card" data-action="selectDay" data-day="${d.id}">
+      <div class="day-card-icon">${d.icon}</div>
+      <div class="day-card-info">
+        <div class="day-card-name">${d.label} — ${d.dow}</div>
+        <div class="day-card-sub">${d.focus}</div>
+      </div>
+      <div class="day-card-arrow">›</div>
+    </button>
+  `).join('');
+
+  return `
+    <div class="screen">
+      <div class="home-hero">
+        <div class="eyebrow">Home Gym Program</div>
+        <h1 class="home-title">Ben's<br><span>OLine</span><br>Build</h1>
+        <div class="badge-row">
+          <div class="badge">Offensive Line</div>
+          <div class="badge">3× / Week</div>
+          <div class="badge">8-12 Weeks Out</div>
+        </div>
+      </div>
+      <div class="home-intro">
+        <strong>What we're building:</strong> Raw strength, hip power, and a wide base. Trap bar for loaded power, barbells for strength, KBs and dumbbells for stability. Three days, full body, built for the line.
+      </div>
+      <div class="day-select-label">Select Today's Session</div>
+      <div class="day-cards">${dayCards}</div>
+      <button class="history-btn" data-action="goHistory">Session History →</button>
+    </div>
+  `;
+}
+
+// ── WARMUP ──
+
+function renderWarmup() {
+  const day = getDay();
+  const items = day.warmUp.map((item, i) => {
+    const checked = !!state.warmupChecked[i];
+    return `
+      <div class="warmup-item${checked ? ' done' : ''}" data-action="toggleWarmup" data-idx="${i}">
+        <div class="warmup-check${checked ? ' done' : ''}">✓</div>
+        <div class="warmup-text">${item}</div>
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <div class="screen">
+      <div class="warmup-header">
+        <button class="back-btn" data-action="goHome">← Back</button>
+        <div class="warmup-title">${day.label}</div>
+        <div class="eyebrow" style="margin-top:4px">${day.dow} · ${day.focus}</div>
+        <div class="warmup-sub" style="margin-top:8px">Warm-up · ${day.warmUp.length} items</div>
+      </div>
+      <div class="warmup-list">${items}</div>
+      <button class="primary-cta" data-action="startWorkout">Start Session →</button>
+    </div>
+  `;
+}
+
+// ── WORKOUT ──
+
+function renderWorkout() {
+  const exercises = getExercises();
+  const idx = state.exIdx;
+  const ex = exercises[idx];
+  const key = ex.key;
+  const setsArr = state.setsMap[key] || Array(ex.sets).fill(false);
+  const lastWeight = getLastWeight(ex.name);
+  const currentWeight = state.weights[key] !== undefined ? state.weights[key] : '';
+
+  const setCircles = setsArr.map((done, i) =>
+    `<button class="set-circle${done ? ' done' : ''}" data-action="toggleSet" data-idx="${i}">${i + 1}</button>`
+  ).join('');
+
+  const callout = ex.callout
+    ? `<div class="ex-callout">${ex.callout}</div>`
+    : '';
+
+  const isBodyweight = ex.equip === 'Bodyweight';
+
+  return `
+    <div class="screen">
+      <div class="workout-header">
+        <div class="workout-counter">Exercise <span>${idx + 1}</span> of <span>${exercises.length}</span></div>
+        <div class="workout-day-name">${getDay().label}</div>
+      </div>
+      <div class="card-wrap">
+        <div class="ex-card">
+          <div class="ex-section-tag">${ex.sectionTitle}</div>
+          <div class="ex-name">${ex.name}</div>
+          <div class="ex-equip">${ex.equip}</div>
+          ${callout}
+          <div class="ex-tip">${ex.tip}</div>
+          <div class="stats-row">
+            <div class="stat-box">
+              <div class="stat-val">${ex.sets}</div>
+              <div class="stat-label">Sets</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-val">${ex.reps}</div>
+              <div class="stat-label">Reps</div>
+            </div>
+          </div>
+          ${!isBodyweight ? `
+          <div class="weight-section">
+            <div class="weight-header">
+              <div class="weight-label">Weight</div>
+              <div class="last-weight">${lastWeight ? 'Last: ' + lastWeight + ' lbs' : 'First time'}</div>
+            </div>
+            <div class="weight-input-row">
+              <input class="weight-input" type="number" inputmode="decimal"
+                placeholder="${lastWeight || '0'}"
+                value="${currentWeight}"
+                data-action="weightInput">
+              <div class="weight-unit">lbs</div>
+            </div>
+          </div>` : ''}
+          <div class="sets-label">Mark Sets Complete</div>
+          <div class="sets-row">${setCircles}</div>
+        </div>
+      </div>
+      <div class="nav-row">
+        <button class="nav-btn nav-btn-prev" data-action="prevEx" ${idx === 0 ? 'disabled' : ''}>← Prev</button>
+        <button class="nav-btn nav-btn-next" data-action="nextEx">
+          ${idx === exercises.length - 1 ? 'Finish ✓' : 'Next →'}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function getLastWeight(exName) {
+  for (const session of state.history) {
+    const found = (session.exercises || []).find(e => e.name === exName && e.weight);
+    if (found) return found.weight;
+  }
+  return null;
+}
+
+// ── DONE ──
+
+function renderDone() {
+  const last = state.history[0];
+  const rows = (last?.exercises || []).map(e => `
+    <div class="summary-row">
+      <div class="summary-ex">${e.name}</div>
+      <div class="summary-vals">
+        ${e.weight ? `<div class="summary-weight">${e.weight} lbs</div>` : ''}
+        <div class="summary-reps">${e.sets}×${e.reps}</div>
+      </div>
+    </div>
+  `).join('');
+
+  return `
+    <div class="done-screen">
+      <div class="done-icon">🏈</div>
+      <div class="done-title">Session Done</div>
+      <div class="done-sub">${last?.dayName || ''} · ${todayStr()}</div>
+      <div class="session-summary">
+        <div class="summary-title">Session Summary</div>
+        ${rows}
+      </div>
+      <button class="done-btn done-btn-primary" data-action="goHome">Back to Program</button>
+      <button class="done-btn done-btn-ghost" data-action="goHistory">View History</button>
+    </div>
+  `;
+}
+
+// ── HISTORY ──
+
+function renderHistory() {
+  const items = state.history.length === 0
+    ? `<div class="history-empty">No sessions logged yet. Hit the field.</div>`
+    : state.history.map(s => {
+        const exRows = (s.exercises || []).map(e => `
+          <div class="history-ex-row">
+            <div class="history-ex-name">${e.name}</div>
+            <div style="display:flex;align-items:center;gap:6px">
+              ${e.weight ? `<div class="history-ex-weight">${e.weight} lbs</div>` : ''}
+              <div class="history-ex-reps">${e.sets}×${e.reps}</div>
+            </div>
+          </div>
+        `).join('');
+        return `
+          <div class="history-item">
+            <div class="history-item-header">
+              <div class="history-item-name">${s.dayName}</div>
+              <div class="history-item-date">${s.date}</div>
+            </div>
+            ${exRows}
+          </div>
+        `;
+      }).join('');
+
+  return `
+    <div class="screen">
+      <div class="history-header">
+        <div>
+          <div class="history-title">History</div>
+          <div class="history-count">${state.history.length} session${state.history.length !== 1 ? 's' : ''} logged</div>
+        </div>
+        <button class="clear-btn" data-action="clearHistory">Clear All</button>
+      </div>
+      <div class="history-list">
+        <button class="back-btn" style="margin-bottom:16px" data-action="goHome">← Back to Program</button>
+        ${items}
+      </div>
+    </div>
+  `;
+}
+
+// ─── EVENTS ──────────────────────────────────────────────────────────────────
+
+function bindEvents() {
+  document.querySelectorAll('[data-action]').forEach(el => {
+    el.addEventListener('click', handleAction);
+    el.addEventListener('change', handleAction);
+    el.addEventListener('input', handleInput);
+  });
+}
+
+function handleInput(e) {
+  if (e.target.dataset.action === 'weightInput') {
+    const exercises = getExercises();
+    const key = exercises[state.exIdx].key;
+    state.weights[key] = e.target.value;
+  }
+}
+
+function handleAction(e) {
+  const action = e.currentTarget.dataset.action;
+  switch (action) {
+    case 'selectDay':
+      state.dayId = e.currentTarget.dataset.day;
+      state.warmupChecked = [];
+      state.setsMap = {};
+      state.weights = {};
+      state.exIdx = 0;
+      state.screen = 'warmup';
+      render();
+      break;
+    case 'toggleWarmup': {
+      const i = parseInt(e.currentTarget.dataset.idx);
+      const arr = state.warmupChecked.slice();
+      arr[i] = !arr[i];
+      state.warmupChecked = arr;
+      render();
+      break;
+    }
+    case 'startWorkout':
+      state.screen = 'workout';
+      render();
+      break;
+    case 'toggleSet': {
+      const i = parseInt(e.currentTarget.dataset.idx);
+      const exercises = getExercises();
+      const key = exercises[state.exIdx].key;
+      const arr = state.setsMap[key] || Array(exercises[state.exIdx].sets).fill(false);
+      arr[i] = !arr[i];
+      state.setsMap[key] = arr;
+      render();
+      break;
+    }
+    case 'prevEx':
+      if (state.exIdx > 0) { state.exIdx--; render(); }
+      break;
+    case 'nextEx': {
+      const exercises = getExercises();
+      if (state.exIdx < exercises.length - 1) {
+        state.exIdx++;
+        render();
+      } else {
+        finishSession();
+      }
+      break;
+    }
+    case 'goHome':
+      state.screen = 'home';
+      render();
+      break;
+    case 'goHistory':
+      state.screen = 'history';
+      render();
+      break;
+    case 'clearHistory':
+      if (confirm('Clear all session history?')) {
+        state.history = [];
+        saveHistory([]);
+        render();
+      }
+      break;
+  }
+}
+
+function finishSession() {
+  const day = getDay();
+  const exercises = getExercises();
+  const session = {
+    date: todayStr(),
+    dayId: state.dayId,
+    dayName: `${day.label} — ${day.focus}`,
+    exercises: exercises.map(ex => ({
+      name: ex.name,
+      weight: state.weights[ex.key] || null,
+      sets: (state.setsMap[ex.key] || []).filter(Boolean).length,
+      reps: ex.reps,
+    })),
+  };
+  state.history = [session, ...state.history].slice(0, 100);
+  saveHistory(state.history);
+  state.screen = 'done';
+  render();
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+
+render();
+
+// ─── SERVICE WORKER ──────────────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  const swCode = `
+    const CACHE = 'oline-v2';
+    self.addEventListener('install', () => self.skipWaiting());
+    self.addEventListener('activate', e => {
+      e.waitUntil(caches.keys().then(ks =>
+        Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))
+      ));
+      self.clients.claim();
+    });
+    self.addEventListener('fetch', e => {
+      e.respondWith(
+        caches.open(CACHE).then(cache =>
+          cache.match(e.request).then(cached => {
+            const network = fetch(e.request)
+              .then(res => { cache.put(e.request, res.clone()); return res; })
+              .catch(() => cached);
+            return cached || network;
+          })
+        )
+      );
+    });
+  `;
+  const blob = new Blob([swCode], { type: 'application/javascript' });
+  navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
+}
+</script>
+</body>
+</html>
