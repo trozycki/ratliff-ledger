@@ -538,12 +538,12 @@ function esc(s) {
 
 async function fetchLedger() {
   try {
-    const resp = await fetch(GIST_API, {
-      headers: { 'Accept': 'application/vnd.github+json' }
+    const resp = await fetch(`${GIST_API}?t=${Date.now()}`, {
+      headers: { 'Accept': 'application/vnd.github+json', 'Cache-Control': 'no-cache' }
     });
     if (!resp.ok) throw new Error('Could not reach the ledger');
     const gist = await resp.json();
-    const content = JSON.parse(gist.files['tbonz-brain-dump.json'].content);
+    const content = JSON.parse(gist.files['ratliff-data.json'].content);
     render(content);
   } catch (e) {
     document.getElementById('app').innerHTML = `
